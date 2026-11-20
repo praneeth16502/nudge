@@ -1,6 +1,6 @@
 {
   "name": "nudge",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Sound + desktop notification when Claude Code is waiting for you (permission prompt, question, or finished turn), but only when you're looking at another app.",
   "author": {
     "name": "praneeth16502",

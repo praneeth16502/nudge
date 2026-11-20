@@ -181,9 +181,25 @@ check "5000-char message: exits 0, still notifies" has "osascript"
 run "$(json Stop)" $MAC FAKE_FRONT=x "NUDGE_TITLE=Hey, Claude needs you"
 check "NUDGE_TITLE changes the headline" has "[Hey, Claude needs you] [proj: Finished its turn]"
 
+section "Claude desktop app (has its own notifications)"
+run "$(json Notification "perm")" $MAC FAKE_FRONT=x CLAUDE_CODE_ENTRYPOINT=claude-desktop
+check "silent inside the desktop app (CLAUDE_CODE_ENTRYPOINT)" eval 'silent && clean'
+run "$(json Notification "perm")" $MAC FAKE_FRONT=x __CFBundleIdentifier=com.anthropic.claudefordesktop
+check "silent inside the desktop app (macOS bundle ID)" eval 'silent && clean'
+run "$(json Notification "perm")" $MAC FAKE_FRONT=x CLAUDE_CODE_ENTRYPOINT=claude-desktop NUDGE_IN_DESKTOP_APP=1
+check "NUDGE_IN_DESKTOP_APP=1 turns it back on" has "osascript"
+run "$(json Notification "perm")" $MAC FAKE_FRONT=x CLAUDE_CODE_ENTRYPOINT=cli TERM_PROGRAM=Apple_Terminal
+check "terminal CLI still nudges" has "osascript"
+run "$(json Notification "perm")" $MAC FAKE_FRONT=x CLAUDE_CODE_ENTRYPOINT=claude-vscode
+check "VS Code extension still nudges" has "osascript"
+TPATH="$S/pwsh:$DEFAULT_PATH"
+run "$(json Notification "perm")" FAKE_UNAME=MINGW64_NT-10.0 CLAUDE_CODE_ENTRYPOINT=claude-desktop
+check "silent inside the desktop app on Windows too" eval 'silent && clean'
+TPATH="$DEFAULT_PATH"
+
 section "macOS: click to focus (terminal-notifier)"
 TPATH="$S/tn:$DEFAULT_PATH"
-run "$(json Notification "perm")" $MAC FAKE_FRONT=x __CFBundleIdentifier=com.anthropic.claudefordesktop
+run "$(json Notification "perm")" $MAC FAKE_FRONT=x __CFBundleIdentifier=com.anthropic.claudefordesktop NUDGE_IN_DESKTOP_APP=1
 check "uses terminal-notifier when installed" has "terminal-notifier [-title] [Claude is waiting for you] [-group] [nudge] [-activate] [com.anthropic.claudefordesktop] stdin=[proj: perm]"
 check "  ...instead of osascript" hasnt "osascript"
 check "  ...exits 0 with no output" clean

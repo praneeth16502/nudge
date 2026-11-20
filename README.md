@@ -4,7 +4,15 @@ A Claude Code plugin that tells you when Claude is waiting for you.
 
 When Claude Code stops for a permission prompt, asks a question, or finishes a turn, nudge plays a sound and shows a desktop notification. It only does this when you're in another app. If Claude, your terminal, or your editor is already in front, it stays quiet.
 
-Works on macOS, Linux, and Windows. No dependencies to install.
+It's made for Claude Code in a **terminal** or **editor** (Terminal, iTerm2, Ghostty, VS Code, Cursor, …), which have no notifications like this of their own. Works on macOS, Linux, and Windows. Nothing else to install.
+
+> nudge is a community plugin. It is not made by or affiliated with Anthropic.
+
+## Using the Claude desktop app?
+
+The Claude desktop app already sends its own notifications. They show Claude's icon, and clicking one opens that session. So nudge **stays silent inside the desktop app** by default, which avoids double notifications. To get banners from the app, check its notification settings, and allow Claude in System Settings → Notifications. Setting the alert style to Persistent keeps banners on screen until you dismiss them.
+
+To have nudge play in the desktop app anyway, for example to use your own music, set `NUDGE_IN_DESKTOP_APP` to `1`.
 
 ## What you see
 
@@ -20,17 +28,16 @@ The text after the project name comes from Claude Code. You can change the headl
 
 ## Clicking the notification (macOS)
 
-Install [terminal-notifier](https://github.com/julienXX/terminal-notifier) and clicking the notification brings back the app Claude is running in (the Claude desktop app, Terminal, iTerm2, VS Code, …):
+A plugin is a script, not an app, so macOS can't show its notifications as coming from Claude. nudge has two ways to post them:
+
+- **Default:** a built-in macOS notification. macOS treats it as coming from Script Editor, so clicking it opens Script Editor.
+- **With [terminal-notifier](https://github.com/julienXX/terminal-notifier) installed:** clicking it brings back the app Claude is running in (Terminal, iTerm2, VS Code, …). nudge finds it on your `PATH` or in Homebrew's folders and uses it automatically. A new nudge replaces the previous banner instead of stacking up.
 
 ```bash
 brew install terminal-notifier
 ```
 
-nudge finds it on your `PATH` or in Homebrew's folders and uses it automatically. A click brings that app to the front, but it can't pick a specific tab or session. A new nudge replaces the previous banner instead of stacking up.
-
-Without terminal-notifier, nudge shows a plain macOS notification. Clicking it opens Script Editor, because macOS treats the banner as coming from that app.
-
-> nudge is a community plugin. It is not made by or affiliated with Anthropic.
+terminal-notifier is optional. Everything else works the same without it. A click brings the app forward, but it can't pick a specific tab or session.
 
 ## Install
 
@@ -86,6 +93,7 @@ Set these in the `env` block of `~/.claude/settings.json`:
 | `NUDGE_TITLE` | `Claude is waiting for you` | Notification headline |
 | `NUDGE_ACTIVATE` | the app Claude runs in | macOS + terminal-notifier: bundle ID of the app a click brings forward |
 | `NUDGE_NOTIFIER` | (auto) | macOS: `osascript` = never use terminal-notifier |
+| `NUDGE_IN_DESKTOP_APP` | `0` | `1` = also nudge inside the Claude desktop app, which has its own notifications |
 | `NUDGE_FORCE` | (unset) | `1` = skip the focused-app check (testing) |
 
 On macOS, sounds live in `/System/Library/Sounds/` (Glass, Ping, Hero, Submarine, Funk, …).

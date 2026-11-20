@@ -17,6 +17,8 @@
 #   NUDGE_ACTIVATE     macOS: app (bundle ID) to bring forward when the banner is
 #                      clicked; default = the app Claude Code is running in
 #   NUDGE_NOTIFIER     macOS: "osascript" to never use terminal-notifier
+#   NUDGE_IN_DESKTOP_APP "1" = also nudge in the Claude desktop app (off by default,
+#                      since the app has its own notifications)
 #   NUDGE_FORCE        "1" = ignore the focused-app check (for testing)
 # Pause: touch ~/.claude/nudge.off      Resume: rm ~/.claude/nudge.off
 
@@ -24,6 +26,13 @@ input="$(cat 2>/dev/null)"   # always drain stdin first, even when paused
 
 STATE_DIR="${HOME}/.claude"
 [ -e "$STATE_DIR/nudge.off" ] && exit 0
+
+# The Claude desktop app sends its own notifications (as Claude, and a click opens
+# the session), so by default stay out of its way there to avoid doubles.
+if [ "${NUDGE_IN_DESKTOP_APP:-0}" != 1 ]; then
+  [ "${CLAUDE_CODE_ENTRYPOINT:-}" = claude-desktop ] && exit 0
+  [ "${__CFBundleIdentifier:-}" = com.anthropic.claudefordesktop ] && exit 0
+fi
 
 # ---- parse hook JSON: jq, else python3, else a rough sed --------------------
 json_get() {
