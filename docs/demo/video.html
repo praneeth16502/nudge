@@ -1,0 +1,219 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>nudge demo video</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  html, body { width: 1280px; height: 720px; }
+  body { position: relative; overflow: hidden; background: #000; }
+  .menubar {
+    position: absolute; top: 0; left: 0; right: 0; height: 30px; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; font-size: 13px; color: #fff;
+    background: rgba(30, 20, 60, 0.18);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  }
+  .menubar .left span { margin-right: 18px; }
+  .menubar .left b { font-weight: 700; }
+  .win { position: absolute; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 0 0 0.5px rgba(0,0,0,0.35), 0 24px 60px rgba(0,0,0,0.35); will-change: transform; }
+  .titlebar { height: 34px; display: flex; align-items: center; padding: 0 12px; gap: 8px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .r { background: #ff5f57; } .y { background: #febc2e; } .g { background: #28c840; }
+  .titlebar .t { flex: 1; text-align: center; font-size: 12.5px; margin-right: 52px; }
+
+  .term { left: 90px; top: 70px; width: 720px; height: 470px; background: #16161d; }
+  .term .titlebar { background: #22222b; color: #a9a9b8; }
+  .term pre { padding: 16px 20px; font: 15px/1.6 "SF Mono", Menlo, monospace; color: #d7d7e0; white-space: pre-wrap; }
+  .dim { color: #7c7c8f; } .acc { color: #f5a97f; } .grn { color: #8bd5a1; } .blu { color: #8ab4f8; }
+  .box { display: block; border: 1px solid #f5a97f; border-radius: 8px; padding: 10px 12px; margin-top: 8px; }
+
+  .browser { left: 400px; top: 120px; width: 800px; height: 470px; background: #fff; }
+  .browser .titlebar { background: #ececf0; height: 44px; position: relative; z-index: 2; }
+  .addr { flex: 1; height: 26px; margin: 0 70px 0 16px; border-radius: 8px; background: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 12.5px; color: #555;
+    box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.12); }
+  .page { padding: 30px 46px; }
+  .page h1 { font-size: 27px; font-weight: 700; color: #1d1d1f; letter-spacing: -0.4px; }
+  .page p.lead { margin-top: 10px; font-size: 15px; color: #6e6e73; }
+  .bar { height: 11px; border-radius: 6px; background: #ececf1; margin-top: 14px; }
+  .card-row { display: flex; gap: 16px; margin-top: 26px; }
+  .card { flex: 1; height: 120px; border-radius: 12px; background: #f5f5f8; box-shadow: inset 0 0 0 1px #ececf1; }
+
+  #banner { position: absolute; top: 40px; right: 14px; z-index: 60; }
+  .ring { position: absolute; left: 12px; top: 12px; width: 38px; height: 38px; border-radius: 12px;
+    border: 2px solid rgba(255,140,90,0.9); pointer-events: none; }
+
+  #caption { position: absolute; left: 50%; bottom: 34px; z-index: 70; transform: translateX(-50%);
+    padding: 12px 22px; border-radius: 999px; background: rgba(12,12,20,0.78); color: #fff;
+    font-size: 21px; font-weight: 600; letter-spacing: -0.2px; white-space: nowrap;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  #caption small { font-weight: 500; font-size: 15px; color: rgba(255,255,255,0.7); margin-left: 8px; }
+
+  #quiet { position: absolute; top: 46px; right: 24px; z-index: 60; display: flex; gap: 10px; align-items: center;
+    padding: 10px 16px; border-radius: 14px; background: rgba(12,12,20,0.7); color: #fff; font-size: 15px; font-weight: 600; }
+
+  #cursor { position: absolute; z-index: 80; width: 26px; height: 26px; left: 0; top: 0; }
+
+  #endcard { position: absolute; inset: 0; z-index: 90; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 18px; background: #101018; color: #fff; }
+  #endcard .logo { width: 84px; height: 84px; border-radius: 22px;
+    background: linear-gradient(160deg, #ffb36b 0%, #ff7a59 55%, #e8505b 100%); display: grid; place-items: center;
+    box-shadow: 0 16px 40px rgba(255,122,89,0.35); }
+  #endcard .logo svg { width: 46px; height: 46px; }
+  #endcard h1 { font-size: 64px; font-weight: 800; letter-spacing: -2px; }
+  #endcard p { font-size: 22px; color: rgba(255,255,255,0.78); }
+  #endcard code { font: 600 19px "SF Mono", Menlo, monospace; color: #ffb36b; padding: 10px 18px;
+    border-radius: 12px; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
+  #endcard .plats { font-size: 15px; color: rgba(255,255,255,0.55); letter-spacing: 0.3px; }
+</style></head>
+<body>
+  <div class="wallpaper"></div>
+  <div class="menubar">
+    <div class="left"><span><b id="appname">Terminal</b></span><span>File</span><span>Edit</span><span>View</span><span>Window</span><span>Help</span></div>
+    <div class="right">Sat 21 Nov&nbsp;&nbsp;10:42</div>
+  </div>
+
+  <div class="win term" id="term">
+    <div class="titlebar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">my-app — claude</span></div>
+    <pre id="termtext"></pre>
+  </div>
+
+  <div class="win browser" id="browser">
+    <div class="titlebar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <div class="addr">docs.example.com/guide</div></div>
+    <div class="page" id="page">
+      <h1>Reading the docs while Claude works</h1>
+      <p class="lead">Somewhere else entirely. Claude is still busy in the terminal.</p>
+      <div class="bar" style="width:92%"></div><div class="bar" style="width:84%"></div>
+      <div class="bar" style="width:88%"></div><div class="bar" style="width:60%"></div>
+      <div class="card-row"><div class="card"></div><div class="card"></div><div class="card"></div></div>
+      <div class="bar" style="width:80%; margin-top: 26px"></div><div class="bar" style="width:70%"></div>
+    </div>
+  </div>
+
+  <div id="banner">
+    <div class="mac-banner" style="position: relative">
+      <div class="app-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+      <div class="mac-text">
+        <div class="mac-row"><span class="mac-title">Claude is waiting for you</span><span class="mac-time">now</span></div>
+        <div class="mac-body">my-app: Claude needs your permission to use Bash</div>
+      </div>
+      <div class="ring" id="ring1"></div><div class="ring" id="ring2"></div>
+    </div>
+  </div>
+
+  <div id="quiet"><span>🔕</span><span>Claude is in front, so no nudge</span></div>
+
+  <div id="caption"></div>
+
+  <svg id="cursor" viewBox="0 0 24 24"><path d="M4 2.5 L4 20 L8.6 15.8 L11.6 22 L14.6 20.6 L11.6 14.5 L18 14.5 Z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>
+
+  <div id="endcard">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+    <h1>nudge</h1>
+    <p>A Claude Code plugin that taps you when Claude is waiting.</p>
+    <code>/plugin marketplace add praneeth16502/nudge</code>
+    <div class="plats">macOS · Linux · Windows</div>
+  </div>
+
+<script>
+// Every frame is a pure function of time t (seconds), so recording is deterministic.
+const DURATION = 15;
+const CHIME_AT = 5.2;   // the recorder reads this to place the sound
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+const lerp = (a, b, x) => a + (b - a) * x;
+const typed = (s, t, a, cps = 38) => s.slice(0, Math.max(0, Math.floor((t - a) * cps)));
+
+const PROMPT = "run the test suite and fix anything that fails";
+function termHTML(t) {
+  let h = `<span class="dim">&gt;</span> ${typed(PROMPT, t, 0.3, 45)}`;
+  if (t > 1.6) h += `\n\n<span class="acc">●</span> ${typed("I'll start by running the tests.", t, 1.6)}`;
+  if (t > 4.6 && t < 9.4) {
+    const sel = t > 8.9;
+    h += `\n<span class="box"><span class="acc">Bash command</span>\n  <span class="blu">npm test -- --coverage</span>\n\nAllow this command?\n${sel ? '<span class="grn">❯ Yes  ✓</span>' : '<span class="grn">❯ Yes</span>'}\n  No</span>`;
+    if (t < 8.9) h += `\n<span class="dim">  waiting for you…</span>`;
+  }
+  if (t >= 9.4) {
+    h += `\n\n<span class="grn">✓</span> Bash(npm test -- --coverage)\n  <span class="dim">42 passed, 0 failed · coverage 91%</span>`;
+    if (t > 10.2) h += `\n\n<span class="acc">●</span> ${typed("All tests pass. Nothing needed fixing.", t, 10.2)}`;
+    if (t > 11.6) h += `\n\n<span class="dim">&gt;</span> <span style="background:#d7d7e0">&nbsp;</span>`;
+  }
+  return h;
+}
+
+const CAPTIONS = [
+  [0.0, 2.3, "You give Claude Code a task…"],
+  [2.3, 4.6, "…and switch to another app while it works."],
+  [4.6, 5.2, "Claude needs your permission."],
+  [5.2, 7.8, "nudge plays a sound and shows a notification."],
+  [7.8, 10.0, "Click it to jump straight back.", "(with terminal-notifier on macOS)"],
+  [10.0, 12.6, "Already looking at Claude? It stays quiet."],
+];
+function caption(t) {
+  for (const [a, b, text, small] of CAPTIONS) {
+    if (t >= a && t < b) {
+      const o = Math.min(prog(t, a, a + 0.25), 1 - prog(t, b - 0.25, b));
+      return { html: text + (small ? `<small>${small}</small>` : ""), o };
+    }
+  }
+  return { html: "", o: 0 };
+}
+
+// cursor path: [time, x, y]
+const PATH = [[0, 640, 600], [2.0, 640, 600], [2.4, 900, 420], [3.4, 860, 470], [4.2, 900, 440],
+              [6.0, 900, 440], [7.4, 1150, 92], [8.2, 1150, 92], [9.4, 700, 420], [15, 700, 420]];
+function cursorAt(t) {
+  for (let i = 0; i < PATH.length - 1; i++) {
+    const [ta, xa, ya] = PATH[i], [tb, xb, yb] = PATH[i + 1];
+    if (t >= ta && t <= tb) { const k = ease(prog(t, ta, tb)); return [lerp(xa, xb, k), lerp(ya, yb, k)]; }
+  }
+  const l = PATH[PATH.length - 1]; return [l[1], l[2]];
+}
+
+window.render = function (t) {
+  // window order: browser in front from 2.2s until the banner is clicked at 8.2s
+  const browserFront = t >= 2.2 && t < 8.2;
+  const term = $("term"), browser = $("browser");
+  term.style.zIndex = browserFront ? 1 : 3; browser.style.zIndex = browserFront ? 3 : 1;
+  const bIn = easeOut(prog(t, 2.0, 2.5)), bOut = ease(prog(t, 8.2, 8.7));
+  browser.style.opacity = t < 2.0 ? 0 : 1;
+  browser.style.transform = `translate(${lerp(60, 0, bIn) + lerp(0, 120, bOut)}px, ${lerp(30, 0, bIn) + lerp(0, 40, bOut)}px) scale(${lerp(0.97, 1, bIn) * lerp(1, 0.96, bOut)})`;
+  browser.style.filter = `brightness(${lerp(1, 0.9, bOut)})`;
+  const tPop = easeOut(prog(t, 8.2, 8.6));
+  term.style.transform = browserFront ? "scale(0.985)" : `scale(${t >= 8.2 ? lerp(0.985, 1, tPop) : 1})`;
+  $("appname").textContent = browserFront ? "Browser" : "Terminal";
+  $("page").style.transform = `translateY(${-lerp(0, 60, ease(prog(t, 3.0, 4.2)))}px)`;
+  $("termtext").innerHTML = termHTML(t);
+
+  // banner: slides in at CHIME_AT, dismissed by the click at 8.2
+  const ban = $("banner");
+  const inK = easeOut(prog(t, CHIME_AT, CHIME_AT + 0.45)), outK = ease(prog(t, 8.15, 8.45));
+  ban.style.opacity = t < CHIME_AT ? 0 : 1 - outK;
+  ban.style.transform = `translateX(${lerp(420, 0, inK) + outK * 30}px) scale(${t > 7.95 && t < 8.2 ? 0.97 : 1})`;
+  for (const [id, delay] of [["ring1", 0], ["ring2", 0.35]]) {
+    const r = prog(t, CHIME_AT + 0.3 + delay, CHIME_AT + 1.3 + delay);
+    const el = $(id); el.style.opacity = r > 0 && r < 1 ? (1 - r) * 0.9 : 0; el.style.transform = `scale(${1 + r * 1.2})`;
+  }
+
+  // "stays quiet" chip during the second scenario
+  const q = $("quiet"), qk = Math.min(prog(t, 10.6, 10.9), 1 - prog(t, 12.3, 12.6));
+  q.style.opacity = qk; q.style.transform = `translateY(${lerp(-8, 0, qk)}px)`;
+
+  const [cx, cy] = cursorAt(t); const click = t > 7.95 && t < 8.2;
+  const cur = $("cursor"); cur.style.transform = `translate(${cx}px, ${cy}px) scale(${click ? 0.85 : 1})`;
+  cur.style.opacity = t > 12.4 ? 0 : 1;
+
+  const c = caption(t); const cap = $("caption");
+  cap.innerHTML = c.html; cap.style.opacity = c.o; cap.style.display = c.o > 0 ? "block" : "none";
+
+  const e = easeOut(prog(t, 12.6, 13.1)); const end = $("endcard");
+  end.style.opacity = e; end.style.display = e > 0 ? "flex" : "none";
+  end.style.transform = `scale(${lerp(1.03, 1, e)})`;
+};
+window.DEMO = { DURATION, CHIME_AT };
+render(new URLSearchParams(location.search).has("t") ? +new URLSearchParams(location.search).get("t") : 6);
+</script>
+</body></html>

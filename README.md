@@ -2,6 +2,8 @@
 
 ![A "Claude is waiting for you" notification appears in the corner while you read docs in another app](docs/images/hero.png)
 
+▶ **[Watch the 15-second demo](docs/images/demo.mp4)** (with sound)
+
 A Claude Code plugin that tells you when Claude is waiting for you.
 
 When Claude Code stops for a permission prompt, asks a question, or finishes a turn, nudge plays a sound and shows a desktop notification. It only does this when you're in another app. If Claude, your terminal, or your editor is already in front, it stays quiet.
@@ -167,9 +169,12 @@ BASH_BIN=/bin/bash bash tests/run.sh # macOS system bash 3.2, which hooks use
 
 The suite swaps every external command (`osascript`, `afplay`, `notify-send`, `powershell.exe`, …) for a stub that logs its arguments. That means it runs silently on any OS and checks exactly what would be called. CI runs it on macOS and Linux, runs `tests/windows.ps1` on real Windows, and runs shellcheck and `claude plugin validate`.
 
-### Demo images
+### Demo images and video
 
-The images in `docs/images/` are illustrations rendered from `docs/demo/*.html`. To regenerate them, run `bash docs/demo/render.sh` (needs Google Chrome).
+The images and video in `docs/images/` are illustrations rendered from `docs/demo/*.html`, not screen recordings.
+
+- **Images:** run `bash docs/demo/render.sh`. Needs Google Chrome.
+- **Video:** run `node docs/demo/record.mjs`. It captures `video.html` frame by frame in headless Chrome, then `encode.swift` builds the MP4 and adds a chime synthesised in code. Needs Chrome, Node 22+ and the Xcode command line tools.
 
 ## License
 
