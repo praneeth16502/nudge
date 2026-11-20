@@ -29,6 +29,13 @@ jobs:
       - name: test suite (macOS system bash 3.2)
         if: runner.os == 'macOS'
         run: BASH_BIN=/bin/bash bash tests/run.sh
+      - name: real terminal-notifier accepts nudge's flags
+        if: runner.os == 'macOS'
+        run: |
+          brew install terminal-notifier
+          printf 'proj: smoke test' | terminal-notifier -title "Claude is waiting for you" -group nudge -activate com.apple.Terminal
+          echo '{"hook_event_name":"Stop","cwd":"/tmp/proj"}' | NUDGE_FORCE=1 NUDGE_SOUND=none bash scripts/nudge.sh
+          sleep 2
 
   windows:
     runs-on: windows-latest

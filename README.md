@@ -6,6 +6,30 @@ When Claude Code stops for a permission prompt, asks a question, or finishes a t
 
 Works on macOS, Linux, and Windows. No dependencies to install.
 
+## What you see
+
+The headline is always **Claude is waiting for you**. The line under it names the project and says what Claude needs:
+
+| When | Notification text |
+|---|---|
+| Claude finished its turn | my-app: Finished its turn |
+| Permission prompt | my-app: Claude needs your permission to use Bash |
+| Idle, waiting for input | my-app: Claude is waiting for your input |
+
+The text after the project name comes from Claude Code. You can change the headline with `NUDGE_TITLE`.
+
+## Clicking the notification (macOS)
+
+Install [terminal-notifier](https://github.com/julienXX/terminal-notifier) and clicking the notification brings back the app Claude is running in (the Claude desktop app, Terminal, iTerm2, VS Code, …):
+
+```bash
+brew install terminal-notifier
+```
+
+nudge finds it on your `PATH` or in Homebrew's folders and uses it automatically. A click brings that app to the front, but it can't pick a specific tab or session. A new nudge replaces the previous banner instead of stacking up.
+
+Without terminal-notifier, nudge shows a plain macOS notification. Clicking it opens Script Editor, because macOS treats the banner as coming from that app.
+
 > nudge is a community plugin. It is not made by or affiliated with Anthropic.
 
 ## Install
@@ -59,6 +83,9 @@ Set these in the `env` block of `~/.claude/settings.json`:
 | `NUDGE_DEBOUNCE` | `10` | Minimum seconds between nudges |
 | `NUDGE_ON_STOP` | `1` | `0` = only nudge for prompts and questions, not finished turns |
 | `NUDGE_QUIET_APPS` | (none) | Extra apps that count as "looking at Claude", comma-separated |
+| `NUDGE_TITLE` | `Claude is waiting for you` | Notification headline |
+| `NUDGE_ACTIVATE` | the app Claude runs in | macOS + terminal-notifier: bundle ID of the app a click brings forward |
+| `NUDGE_NOTIFIER` | (auto) | macOS: `osascript` = never use terminal-notifier |
 | `NUDGE_FORCE` | (unset) | `1` = skip the focused-app check (testing) |
 
 On macOS, sounds live in `/System/Library/Sounds/` (Glass, Ping, Hero, Submarine, Funk, …).
@@ -99,7 +126,7 @@ Claude desktop app, Terminal, iTerm2, Ghostty, Warp, kitty, Alacritty, WezTerm, 
 
 **macOS.**
 - The focused app is read with `lsappinfo`, which needs no Automation permission.
-- The first notification may ask you to allow notifications for Script Editor. If notifications never show up, turn on Script Editor in System Settings → Notifications.
+- The first notification may ask you to allow notifications for Script Editor, or for terminal-notifier if it's installed. If notifications never show up, turn that app on in System Settings → Notifications.
 
 **Linux.**
 - Notifications use `notify-send` (libnotify). Sound uses `mpv` or `ffplay` when installed, otherwise `paplay`, `pw-play`, or `aplay`.

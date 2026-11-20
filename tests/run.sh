@@ -66,8 +66,17 @@ EOF
 chmod +x "$S/core/lsappinfo" "$S/core/uname" "$S/x/xdotool"
 mkstub "$S/mpv" mpv; mkstub "$S/ffplay" ffplay; mkstub "$S/paplay" paplay
 mkstub "$S/pwsh" powershell.exe
+# terminal-notifier stub also records the message it receives on stdin.
+mkdir -p "$S/tn" "$S/tnalt"
+cat > "$S/tn/terminal-notifier" <<'EOF'
+#!/bin/sh
+msg="$(cat)"
+line="terminal-notifier"; for a in "$@"; do line="$line [$a]"; done
+printf '%s stdin=[%s]\n' "$line" "$msg" >> "$NUDGE_TEST_LOG"
+EOF
+chmod +x "$S/tn/terminal-notifier"; cp "$S/tn/terminal-notifier" "$S/tnalt/"
 # Warm up: macOS scans brand-new executables on first launch, which can be slow.
-for f in "$S"/*/*; do NUDGE_TEST_LOG=/dev/null "$f" front >/dev/null 2>&1; done
+for f in "$S"/*/*; do NUDGE_TEST_LOG=/dev/null "$f" front </dev/null >/dev/null 2>&1; done
 
 # ---- minimal PATH with only the tools nudge is allowed to rely on ---------------
 T="$TMP/tools"; mkdir -p "$T/base" "$T/jq" "$T/py" "$T/timeout"
@@ -97,7 +106,7 @@ json() { # json EVENT [MESSAGE] [CWD]
 reset_state() { rm -f "$H/.claude/.nudge.last" "$H/.claude/nudge.off"; }
 hook() { # hook JSON [VAR=val ...]   (appends to $LOG; call reset_log first)
   local j="$1"; shift
-  printf '%s' "$j" | env -i HOME="$H" PATH="$TPATH" NUDGE_TEST_LOG="$LOG" "$@" \
+  printf '%s' "$j" | env -i HOME="$H" PATH="$TPATH" NUDGE_TEST_LOG="$LOG" NUDGE_TN_SEARCH= "$@" \
     "$BASH_BIN" "$SCRIPT" >"$TMP/out" 2>"$TMP/err"
   RC=$?
   sleep 0.2   # let detached stubs write their log lines
@@ -145,29 +154,62 @@ check "NUDGE_FORCE=1 skips the focus check" has "osascript"
 
 section "macOS: message content"
 run "$(json Stop "" "/Users/me/my project")" $MAC FAKE_FRONT=x
-check "Stop: project name in title" has "[Claude Code · my project]"
-check "Stop: 'Finished' body" has "[Finished. Waiting for your next message.]"
+check "headline is 'Claude is waiting for you'" has "[Claude is waiting for you]"
+check "Stop: body is project + 'Finished its turn'" has "[my project: Finished its turn]"
 run "$(json Notification "Claude needs your permission to use Bash")" $MAC FAKE_FRONT=x
-check "Notification: message becomes the body" has "[Claude needs your permission to use Bash]"
+check "Notification: message becomes the body" has "[proj: Claude needs your permission to use Bash]"
 run "$(json Notification "" )" $MAC FAKE_FRONT=x
-check "Notification without message: fallback body" has "[Needs your input]"
+check "Notification without message: fallback body" has "[proj: Needs your input]"
 run "$(json SubagentStop)" $MAC FAKE_FRONT=x
-check "unknown event: generic body" has "[Waiting for you]"
+check "unknown event: generic body" has "[proj: Needs your input]"
 run "$(json Stop "" "")" $MAC FAKE_FRONT=x
-check "no cwd: plain title" has "[Claude Code] [Finished"
+check "no cwd: body without project prefix" has "[Claude is waiting for you] [Finished its turn]"
 EVIL='$(touch '"$TMP"'/pwned) `touch '"$TMP"'/pwned2` "quoted" it'"'"'s \ back'
 run "$(json Notification "$EVIL")" $MAC FAKE_FRONT=x
 check "shell metacharacters are not executed" test ! -e "$TMP/pwned" -a ! -e "$TMP/pwned2"
-check "  ...and reach the notification verbatim" has "[$EVIL]"
+check "  ...and reach the notification verbatim" has "[proj: $EVIL]"
 check "  ...passed as argv, never spliced into AppleScript" has "[on run argv]"
 run "$(json Notification "日本語 ✅ émoji 🚀")" $MAC FAKE_FRONT=x
-check "unicode / emoji message" has "[日本語 ✅ émoji 🚀]"
+check "unicode / emoji message" has "[proj: 日本語 ✅ émoji 🚀]"
 run "$(json Notification "line one
 line two")" $MAC FAKE_FRONT=x
 check "multi-line message: exits 0, still notifies" has "osascript"
 LONG="$(printf 'x%.0s' $(seq 1 5000))"
 run "$(json Notification "$LONG")" $MAC FAKE_FRONT=x
 check "5000-char message: exits 0, still notifies" has "osascript"
+
+run "$(json Stop)" $MAC FAKE_FRONT=x "NUDGE_TITLE=Hey, Claude needs you"
+check "NUDGE_TITLE changes the headline" has "[Hey, Claude needs you] [proj: Finished its turn]"
+
+section "macOS: click to focus (terminal-notifier)"
+TPATH="$S/tn:$DEFAULT_PATH"
+run "$(json Notification "perm")" $MAC FAKE_FRONT=x __CFBundleIdentifier=com.anthropic.claudefordesktop
+check "uses terminal-notifier when installed" has "terminal-notifier [-title] [Claude is waiting for you] [-group] [nudge] [-activate] [com.anthropic.claudefordesktop] stdin=[proj: perm]"
+check "  ...instead of osascript" hasnt "osascript"
+check "  ...exits 0 with no output" clean
+run "$(json Stop)" $MAC FAKE_FRONT=x TERM_PROGRAM=iTerm.app
+check "no bundle ID: falls back to TERM_PROGRAM (iTerm)" has "[-activate] [com.googlecode.iterm2]"
+run "$(json Stop)" $MAC FAKE_FRONT=x TERM_PROGRAM=Apple_Terminal
+check "  ...Terminal.app" has "[-activate] [com.apple.Terminal]"
+run "$(json Stop)" $MAC FAKE_FRONT=x __CFBundleIdentifier=com.apple.Terminal NUDGE_ACTIVATE=com.mitchellh.ghostty
+check "NUDGE_ACTIVATE overrides the detected app" has "[-activate] [com.mitchellh.ghostty]"
+run "$(json Stop)" $MAC FAKE_FRONT=x
+check "app unknown: notifies without -activate" eval 'has terminal-notifier && hasnt "[-activate]"'
+run "$(json Stop)" $MAC FAKE_FRONT=x '__CFBundleIdentifier=com.x;touch /tmp/nudge-pwn'
+check "invalid bundle ID is ignored, not passed on" eval 'has terminal-notifier && hasnt "[-activate]"'
+run "$(json Notification "-message [x] -remove ALL" "")" $MAC FAKE_FRONT=x
+check "body is sent on stdin, so '-flags' in text stay text" has "stdin=[-message [x] -remove ALL]"
+run "$(json Notification "$EVIL")" $MAC FAKE_FRONT=x
+check "shell metacharacters reach terminal-notifier verbatim" eval 'has "stdin=[proj: $EVIL]" && test ! -e "$TMP/pwned"'
+run "$(json Stop)" $MAC FAKE_FRONT=x NUDGE_NOTIFIER=osascript
+check "NUDGE_NOTIFIER=osascript forces the old banner" eval 'has osascript && hasnt terminal-notifier'
+run "$(json Stop)" $MAC FAKE_FRONT=x "$SND"
+check "sound still plays alongside terminal-notifier" has "afplay"
+TPATH="$DEFAULT_PATH"
+run "$(json Stop)" $MAC FAKE_FRONT=x "NUDGE_TN_SEARCH=/nonexistent:$S/tnalt"
+check "found in Homebrew dirs when not on PATH" has "terminal-notifier [-title]"
+run "$(json Stop)" $MAC FAKE_FRONT=x
+check "not installed: falls back to osascript" eval 'has osascript && hasnt terminal-notifier'
 
 section "macOS: sound"
 if [ -f /System/Library/Sounds/Glass.aiff ]; then
@@ -244,19 +286,19 @@ section "JSON parsing fallbacks"
 TPATH="$S/core:$T/base:$T/py"
 if [ -e "$T/py/python3" ]; then
   run "$(json Notification 'Allow "x" to run' "/a/py proj")" $MAC FAKE_FRONT=x
-  check "no jq → python3 parses quotes correctly" eval 'has "[Allow \"x\" to run]" && has "[Claude Code · py proj]"'
+  check "no jq → python3 parses quotes correctly" eval 'has "[py proj: Allow \"x\" to run]"'
 fi
 TPATH="$S/core:$T/base"
 run "$(json Notification 'Plain message' /a/sedproj)" $MAC FAKE_FRONT=x
-check "no jq, no python3 → sed parses simple values" eval 'has "[Plain message]" && has "[Claude Code · sedproj]"'
+check "no jq, no python3 → sed parses simple values" eval 'has "[sedproj: Plain message]"'
 TPATH="$DEFAULT_PATH"
 
 section "Linux"
 LIN="FAKE_UNAME=Linux"
 run "$(json Notification "perm" /x/lproj)" $LIN
-check "notify-send gets app name, title, body" has "notify-send [-a] [Claude Code] [-i] [dialog-information] [--] [Claude Code · lproj] [perm]"
-run "$(json Notification "-u critical")" $LIN
-check "body starting with '-' isn't read as an option" has "[--] [Claude Code · proj] [-u critical]"
+check "notify-send gets app name, title, body" has "notify-send [-a] [Claude Code] [-i] [dialog-information] [--] [Claude is waiting for you] [lproj: perm]"
+run "$(json Notification "-u critical" "")" $LIN
+check "body starting with '-' isn't read as an option" has "[--] [Claude is waiting for you] [-u critical]"
 TPATH="$S/mpv:$S/ffplay:$S/paplay:$DEFAULT_PATH"
 run "$(json Stop)" $LIN "$SND" NUDGE_SOUND_SECONDS=4 NUDGE_VOLUME=70
 check "mpv preferred, with length + volume" has "mpv [--no-video] [--really-quiet] [--length=4] [--volume=70] [$M/my song.mp3]"
@@ -287,7 +329,7 @@ WIN="FAKE_UNAME=MINGW64_NT-10.0-22631"
 TPATH="$S/pwsh:$DEFAULT_PATH"
 run "$(json Notification "perm" /c/proj)" $WIN
 check "calls PowerShell with nudge-windows.ps1" has "powershell.exe [-NoProfile] [-NonInteractive] [-ExecutionPolicy] [Bypass] [-File] [$ROOT/scripts/nudge-windows.ps1]"
-check "  ...passes title/body/seconds/volume" has "[-Title] [Claude Code · proj] [-Body] [perm] [-Seconds] [8] [-Volume] [100]"
+check "  ...passes title/body/seconds/volume" has "[-Title] [Claude is waiting for you] [-Body] [proj: perm] [-Seconds] [8] [-Volume] [100]"
 check "  ...omits -Sound when unset (PS 5.1 drops empty args)" hasnt "[-Sound]"
 run "$(json Stop)" $WIN NUDGE_SOUND=none
 check "  ...passes -Sound none" has "[-Sound] [none]"

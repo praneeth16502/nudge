@@ -13,6 +13,10 @@
 #                      "looking at Claude" (macOS bundle ID, Linux process name,
 #                      Windows process name)
 #   NUDGE_ON_STOP      "0" = don't nudge when a turn finishes, only on prompts
+#   NUDGE_TITLE        notification headline (default "Claude is waiting for you")
+#   NUDGE_ACTIVATE     macOS: app (bundle ID) to bring forward when the banner is
+#                      clicked; default = the app Claude Code is running in
+#   NUDGE_NOTIFIER     macOS: "osascript" to never use terminal-notifier
 #   NUDGE_FORCE        "1" = ignore the focused-app check (for testing)
 # Pause: touch ~/.claude/nudge.off      Resume: rm ~/.claude/nudge.off
 
@@ -42,12 +46,13 @@ cwd="$(json_get cwd)"
 [ "$event" = "Stop" ] && [ "${NUDGE_ON_STOP:-1}" = "0" ] && exit 0
 
 project="$(basename "${cwd:-}" 2>/dev/null)"
-title="Claude Code${project:+ · $project}"
+title="${NUDGE_TITLE:-Claude is waiting for you}"
 case "$event" in
-  Stop)         body="Finished. Waiting for your next message." ;;
-  Notification) body="${message:-Needs your input}" ;;
-  *)            body="${message:-Waiting for you}" ;;
+  Stop)         detail="Finished its turn" ;;
+  Notification) detail="${message:-Needs your input}" ;;
+  *)            detail="${message:-Needs your input}" ;;
 esac
+body="${project:+$project: }$detail"
 
 # ---- platform -----------------------------------------------------------------
 case "$(uname -s 2>/dev/null)" in
@@ -140,10 +145,43 @@ if [ "$os" = mac ]; then
     v="$(awk -v v="$vol" 'BEGIN{printf "%.2f", v/100}')"
     ( afplay -t "$secs" -v "$v" "$sound" >/dev/null 2>&1 & )
   fi
-  # Text goes in as argv, so quotes in messages can't break the AppleScript.
-  ( osascript -e 'on run argv' \
-              -e 'display notification (item 2 of argv) with title (item 1 of argv)' \
-              -e 'end run' "$title" "$body" >/dev/null 2>&1 & )
+  # terminal-notifier (optional, `brew install terminal-notifier`) lets a click bring
+  # Claude's app forward. Hooks may run with a short PATH, so also look in Homebrew dirs.
+  tn=""
+  if [ "${NUDGE_NOTIFIER:-}" != osascript ]; then
+    tn="$(command -v terminal-notifier 2>/dev/null)"
+    if [ -z "$tn" ]; then
+      old_ifs="$IFS"; IFS=:
+      for d in ${NUDGE_TN_SEARCH-/opt/homebrew/bin:/usr/local/bin}; do
+        [ -n "$d" ] && [ -x "$d/terminal-notifier" ] && { tn="$d/terminal-notifier"; break; }
+      done
+      IFS="$old_ifs"
+    fi
+  fi
+  if [ -n "$tn" ]; then
+    # App to focus on click: explicit setting, else the app this hook was launched from.
+    app="${NUDGE_ACTIVATE:-${__CFBundleIdentifier:-}}"
+    if [ -z "$app" ]; then
+      case "${TERM_PROGRAM:-}" in
+        Apple_Terminal) app=com.apple.Terminal ;;
+        iTerm.app)      app=com.googlecode.iterm2 ;;
+        vscode)         app=com.microsoft.VSCode ;;
+        ghostty)        app=com.mitchellh.ghostty ;;
+        WezTerm)        app=com.github.wez.wezterm ;;
+        WarpTerminal)   app=dev.warp.Warp-Stable ;;
+      esac
+    fi
+    case "$app" in *[!A-Za-z0-9.-]*) app="" ;; esac   # bundle IDs only
+    set -- -title "$title" -group nudge
+    [ -n "$app" ] && set -- "$@" -activate "$app"
+    # Body goes in on stdin, so text starting with "-" or "[" isn't read as an option.
+    ( printf '%s' "$body" | "$tn" "$@" >/dev/null 2>&1 & )
+  else
+    # Text goes in as argv, so quotes in messages can't break the AppleScript.
+    ( osascript -e 'on run argv' \
+                -e 'display notification (item 2 of argv) with title (item 1 of argv)' \
+                -e 'end run' "$title" "$body" >/dev/null 2>&1 & )
+  fi
 else
   [ -z "$sound" ] && sound=/usr/share/sounds/freedesktop/stereo/complete.oga
   if [ "$sound" != none ] && [ -f "$sound" ]; then
