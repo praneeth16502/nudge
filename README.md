@@ -1,9 +1,5 @@
 # nudge
 
-![A "Claude is waiting for you" notification appears in the corner while you read docs in another app](docs/images/hero.png)
-
-▶ **[Watch the 15-second demo] 
-
 https://github.com/user-attachments/assets/1fd49a46-a954-4340-a49d-5508834be273
 
 
