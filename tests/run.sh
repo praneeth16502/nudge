@@ -11,10 +11,11 @@
 #         BASH_BIN=/bin/bash tests/run.sh
 # Needs:  jq (to build test JSON).
 #
-# shellcheck disable=SC2086,SC2016,SC2046
+# shellcheck disable=SC2086,SC2016,SC2046,SC2028,SC2088
 # SC2086: $MAC/$LIN/$WIN hold one VAR=value each and are split on purpose.
 # SC2016: check strings are single-quoted so `eval` expands them later.
 # SC2046: $(seq …) is split on purpose.
+# SC2028/SC2088: literal \n and ~ strings are intended (stub source, test labels).
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPT="$ROOT/scripts/nudge.sh"

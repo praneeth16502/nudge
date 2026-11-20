@@ -8,7 +8,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: shellcheck
         run: shellcheck scripts/nudge.sh tests/run.sh
       - name: validate plugin + marketplace manifests
@@ -23,7 +23,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: test suite (default bash)
         run: bash tests/run.sh
       - name: test suite (macOS system bash 3.2)
@@ -33,7 +33,7 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: nudge-windows.ps1
         shell: powershell
         run: .\tests\windows.ps1

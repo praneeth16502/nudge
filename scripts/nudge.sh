@@ -59,6 +59,8 @@ esac
 
 # ---- custom sound: expand ~, pick a random track if it's a folder -------------
 sound="${NUDGE_SOUND:-}"
+# Matching a literal ~ on purpose; it is expanded to $HOME right here.
+# shellcheck disable=SC2088
 case "$sound" in "~"|"~/"*) sound="$HOME${sound#\~}" ;; esac
 if [ -n "$sound" ] && [ -d "$sound" ]; then
   sound="$(find "$sound" -maxdepth 1 -type f \( -iname '*.mp3' -o -iname '*.m4a' \
