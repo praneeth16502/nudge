@@ -1,0 +1,88 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>nudge platforms</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  body { position: relative; background: #101018; }
+  .wrap { position: absolute; inset: 0; padding: 44px 48px; display: flex; flex-direction: column; }
+  h2 { color: #fff; font-size: 28px; font-weight: 750; letter-spacing: -0.5px; }
+  .sub { color: rgba(255,255,255,0.7); font-size: 15px; margin-top: 6px; }
+  .cards { display: flex; gap: 22px; margin-top: 28px; flex: 1; }
+  .card { flex: 1; border-radius: 16px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+  .card .head { position: relative; z-index: 2; padding: 16px 18px 0; color: #fff; font-weight: 700; font-size: 15px; }
+  .card .head small { display: block; font-weight: 500; font-size: 12.5px; opacity: 0.8; margin-top: 3px; }
+  .card .stage { position: relative; z-index: 2; flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .bg { position: absolute; inset: 0; }
+  .bg-mac { background: radial-gradient(70% 90% at 20% 10%, #7b6cf6, transparent 60%), radial-gradient(70% 90% at 90% 90%, #f58fb3, transparent 60%), #5b5bd6; }
+  .bg-linux { background: radial-gradient(80% 90% at 80% 10%, #3a7bd5, transparent 60%), radial-gradient(70% 90% at 10% 90%, #2b2d42, transparent 60%), #241f31; }
+  .bg-win { background: radial-gradient(80% 90% at 30% 20%, #2a6df4, transparent 60%), radial-gradient(70% 90% at 90% 90%, #0b2a6b, transparent 60%), #0a1f4d; }
+  .card .mac-banner { width: 100%; }
+
+  /* GNOME-style */
+  .gnome {
+    width: 100%; border-radius: 14px; background: #2e2e32; color: #fff;
+    padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 12px 30px rgba(0,0,0,0.4);
+  }
+  .gnome .ico { width: 34px; height: 34px; border-radius: 50%; background: #3584e4; display: grid; place-items: center; flex: none; }
+  .gnome .ico svg { width: 18px; height: 18px; }
+  .gnome .meta { font-size: 11.5px; color: #b8b8c0; }
+  .gnome .t { font-size: 14px; font-weight: 700; margin-top: 2px; }
+  .gnome .b { font-size: 13.5px; color: #deddda; margin-top: 3px; line-height: 1.35; }
+
+  /* Windows toast */
+  .toast {
+    width: 100%; border-radius: 8px; background: rgba(32,32,36,0.96); color: #fff;
+    padding: 12px 14px 16px; box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 16px 34px rgba(0,0,0,0.45);
+    font-family: "Segoe UI Variable", "Segoe UI", -apple-system, sans-serif;
+  }
+  .toast .app { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #c9c9cf; }
+  .toast .app i { width: 16px; height: 16px; border-radius: 3px; background: #2a6df4; display: inline-block; }
+  .toast .app .x { margin-left: auto; color: #8d8d95; font-style: normal; }
+  .toast .t { font-size: 14px; font-weight: 600; margin-top: 12px; }
+  .toast .b { font-size: 13.5px; color: #d6d6dc; margin-top: 3px; line-height: 1.35; }
+  .foot { color: rgba(255,255,255,0.55); font-size: 12px; margin-top: 16px; }
+</style></head>
+<body>
+  <div class="wrap">
+    <h2>Works on macOS, Linux and Windows</h2>
+    <div class="sub">A sound and a native notification, only when you're in another app.</div>
+    <div class="cards">
+
+      <div class="card"><div class="bg bg-mac"></div>
+        <div class="head">macOS<small>Notification Center banner</small></div>
+        <div class="stage">
+          <div class="mac-banner">
+            <div class="app-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+            <div class="mac-text"><div class="mac-row"><span class="mac-title">Claude is waiting for you</span><span class="mac-time">now</span></div>
+              <div class="mac-body">my-app: Claude needs your permission to use Bash</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card"><div class="bg bg-linux"></div>
+        <div class="head">Linux<small>notify-send (GNOME, KDE, …)</small></div>
+        <div class="stage">
+          <div class="gnome">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5h.01"/></svg></div>
+            <div><div class="meta">Claude Code · now</div>
+              <div class="t">Claude is waiting for you</div>
+              <div class="b">my-app: Claude needs your permission to use Bash</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card"><div class="bg bg-win"></div>
+        <div class="head">Windows<small>Toast notification</small></div>
+        <div class="stage">
+          <div class="toast">
+            <div class="app"><i></i>Windows PowerShell<em class="x">✕</em></div>
+            <div class="t">Claude is waiting for you</div>
+            <div class="b">my-app: Claude needs your permission to use Bash</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="foot">Illustrations. Exact look follows your OS version and theme.</div>
+  </div>
+</body></html>

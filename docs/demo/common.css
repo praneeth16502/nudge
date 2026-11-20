@@ -1,0 +1,50 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+.wallpaper {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 80% at 15% 20%, #7b6cf6 0%, transparent 60%),
+    radial-gradient(55% 70% at 85% 15%, #f58fb3 0%, transparent 60%),
+    radial-gradient(70% 90% at 70% 95%, #f7b267 0%, transparent 60%),
+    radial-gradient(60% 80% at 10% 100%, #4cc9f0 0%, transparent 60%),
+    #5b5bd6;
+}
+
+/* ---------- macOS notification banner ---------- */
+.mac-banner {
+  width: 372px;
+  display: flex; gap: 11px; align-items: flex-start;
+  padding: 13px 14px 13px 12px;
+  border-radius: 22px;
+  background: rgba(246, 246, 248, 0.78);
+  backdrop-filter: blur(30px) saturate(1.6);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.12), 0 10px 30px rgba(0,0,0,0.22);
+  color: #1d1d1f;
+}
+.mac-banner.solid { background: #f4f4f6; }
+.app-icon {
+  flex: none; width: 38px; height: 38px; border-radius: 9px;
+  background: linear-gradient(160deg, #ffb36b 0%, #ff7a59 55%, #e8505b 100%);
+  box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.15);
+  display: grid; place-items: center;
+}
+.app-icon svg { width: 22px; height: 22px; }
+.mac-text { flex: 1; min-width: 0; }
+.mac-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.mac-title { font-size: 13.5px; font-weight: 650; letter-spacing: -0.1px; }
+.mac-time { font-size: 12px; color: rgba(60,60,67,0.6); flex: none; }
+.mac-body { font-size: 13.5px; line-height: 1.32; margin-top: 2px; color: #1d1d1f; }
+
+/* ---------- labels ---------- */
+.pill {
+  display: inline-block; font-size: 13px; font-weight: 600;
+  padding: 5px 11px; border-radius: 999px;
+  background: rgba(255,255,255,0.22); color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35);
+}

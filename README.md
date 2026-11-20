@@ -1,5 +1,7 @@
 # nudge
 
+![A "Claude is waiting for you" notification appears in the corner while you read docs in another app](docs/images/hero.png)
+
 A Claude Code plugin that tells you when Claude is waiting for you.
 
 When Claude Code stops for a permission prompt, asks a question, or finishes a turn, nudge plays a sound and shows a desktop notification. It only does this when you're in another app. If Claude, your terminal, or your editor is already in front, it stays quiet.
@@ -17,6 +19,8 @@ To have nudge play in the desktop app anyway, for example to use your own music,
 ## What you see
 
 The headline is always **Claude is waiting for you**. The line under it names the project and says what Claude needs:
+
+![Three example notifications: permission prompt, question, and finished turn](docs/images/messages.png)
 
 | When | Notification text |
 |---|---|
@@ -132,6 +136,8 @@ Claude desktop app, Terminal, iTerm2, Ghostty, Warp, kitty, Alacritty, WezTerm, 
 
 ## Platform notes
 
+![The same notification on macOS, Linux and Windows](docs/images/platforms.png)
+
 **macOS.**
 - The focused app is read with `lsappinfo`, which needs no Automation permission.
 - The first notification may ask you to allow notifications for Script Editor, or for terminal-notifier if it's installed. If notifications never show up, turn that app on in System Settings → Notifications.
@@ -160,6 +166,10 @@ BASH_BIN=/bin/bash bash tests/run.sh # macOS system bash 3.2, which hooks use
 ```
 
 The suite swaps every external command (`osascript`, `afplay`, `notify-send`, `powershell.exe`, …) for a stub that logs its arguments. That means it runs silently on any OS and checks exactly what would be called. CI runs it on macOS and Linux, runs `tests/windows.ps1` on real Windows, and runs shellcheck and `claude plugin validate`.
+
+### Demo images
+
+The images in `docs/images/` are illustrations rendered from `docs/demo/*.html`. To regenerate them, run `bash docs/demo/render.sh` (needs Google Chrome).
 
 ## License
 

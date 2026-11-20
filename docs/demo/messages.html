@@ -1,0 +1,54 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>nudge messages</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  body { position: relative; }
+  .wrap { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 90px; }
+  h2 { color: #fff; font-size: 30px; font-weight: 750; letter-spacing: -0.5px; }
+  .sub { color: rgba(255,255,255,0.85); font-size: 16px; margin-top: 6px; }
+  .rows { margin-top: 30px; display: flex; flex-direction: column; gap: 16px; }
+  .row { display: flex; align-items: center; gap: 28px; }
+  .row .label { width: 220px; flex: none; }
+  .row .label .pill { font-size: 14px; }
+  .row .label .why { display: block; margin-top: 7px; color: rgba(255,255,255,0.8); font-size: 13px; }
+  .mac-banner { width: 520px; }
+  .note { position: absolute; right: 90px; bottom: 30px; color: rgba(255,255,255,0.7); font-size: 12.5px; }
+</style></head>
+<body>
+  <div class="wallpaper"></div>
+  <div class="wrap">
+    <h2>One headline, the details underneath</h2>
+    <div class="sub">The project name, then what Claude needs from you.</div>
+    <div class="rows">
+
+      <div class="row">
+        <div class="label"><span class="pill">Permission prompt</span><span class="why">Claude wants to run a tool</span></div>
+        <div class="mac-banner">
+          <div class="app-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+          <div class="mac-text"><div class="mac-row"><span class="mac-title">Claude is waiting for you</span><span class="mac-time">now</span></div>
+            <div class="mac-body">my-app: Claude needs your permission to use Bash</div></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label"><span class="pill">Question / idle</span><span class="why">Claude asked something</span></div>
+        <div class="mac-banner">
+          <div class="app-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+          <div class="mac-text"><div class="mac-row"><span class="mac-title">Claude is waiting for you</span><span class="mac-time">2m ago</span></div>
+            <div class="mac-body">api-server: Claude is waiting for your input</div></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label"><span class="pill">Turn finished</span><span class="why">Ready for your next message</span></div>
+        <div class="mac-banner">
+          <div class="app-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+          <div class="mac-text"><div class="mac-row"><span class="mac-title">Claude is waiting for you</span><span class="mac-time">5m ago</span></div>
+            <div class="mac-body">website: Finished its turn</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="note">Illustration. The app icon shown depends on how the banner is posted.</div>
+</body></html>
