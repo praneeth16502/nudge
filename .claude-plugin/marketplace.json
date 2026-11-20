@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "nudge",
+  "description": "Get nudged when Claude Code is waiting on you.",
+  "owner": {
+    "name": "praneeth16502",
+    "url": "https://github.com/praneeth16502"
+  },
+  "plugins": [
+    {
+      "name": "nudge",
+      "description": "Sound + notification when Claude Code needs you and you're in another app.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

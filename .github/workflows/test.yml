@@ -1,0 +1,52 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: shellcheck scripts/nudge.sh tests/run.sh
+      - name: validate plugin + marketplace manifests
+        run: |
+          npx -y @anthropic-ai/claude-code plugin validate .
+          npx -y @anthropic-ai/claude-code plugin validate .claude-plugin/plugin.json
+
+  unix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: test suite (default bash)
+        run: bash tests/run.sh
+      - name: test suite (macOS system bash 3.2)
+        if: runner.os == 'macOS'
+        run: BASH_BIN=/bin/bash bash tests/run.sh
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: nudge-windows.ps1
+        shell: powershell
+        run: .\tests\windows.ps1
+      - name: end to end through Git Bash
+        shell: bash
+        run: |
+          stamp="$USERPROFILE/.claude/.nudge.last"
+          rm -f "$stamp"
+          before=$(date +%s)
+          echo '{"hook_event_name":"Notification","message":"perm","cwd":"C:/work/proj"}' \
+            | NUDGE_FORCE=1 NUDGE_SOUND=none NUDGE_DEBOUNCE=0 bash scripts/nudge.sh
+          echo "hook exit code: $?"
+          for i in $(seq 1 30); do [ -s "$stamp" ] && break; sleep 1; done
+          echo "stamp: $(cat "$stamp" 2>/dev/null) (before: $before)"
+          test -s "$stamp"
+          test "$(tr -d '\r\n ' < "$stamp")" -ge "$((before - 5))"
