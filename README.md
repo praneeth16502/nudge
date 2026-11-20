@@ -2,7 +2,11 @@
 
 ![A "Claude is waiting for you" notification appears in the corner while you read docs in another app](docs/images/hero.png)
 
-▶ **[Watch the 15-second demo](docs/images/demo.mp4)** (with sound)
+▶ **[Watch the 15-second demo] 
+
+https://github.com/user-attachments/assets/1fd49a46-a954-4340-a49d-5508834be273
+
+
 
 A Claude Code plugin that tells you when Claude is waiting for you.
 
