@@ -33,7 +33,15 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew install terminal-notifier
-          printf 'proj: smoke test' | terminal-notifier -title "Claude is waiting for you" -group nudge -activate com.apple.Terminal
+          tn="$(brew --prefix)/bin/terminal-notifier"
+          # Exit 0 = shown; 3 = flags fine but headless runners can't grant notification
+          # permission. Anything else (e.g. a usage error) fails the job.
+          set +e
+          printf 'proj: smoke test' | "$tn" -title "Claude is waiting for you" -group nudge -activate com.apple.Terminal
+          rc=$?
+          set -e
+          echo "terminal-notifier exit code: $rc"
+          [ "$rc" = 0 ] || [ "$rc" = 3 ]
           echo '{"hook_event_name":"Stop","cwd":"/tmp/proj"}' | NUDGE_FORCE=1 NUDGE_SOUND=none bash scripts/nudge.sh
           sleep 2
 
