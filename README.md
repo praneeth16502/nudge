@@ -1,4 +1,4 @@
-# nudge
+# nudge-me
 
 https://github.com/user-attachments/assets/1fd49a46-a954-4340-a49d-5508834be273
 
@@ -39,11 +39,7 @@ A plugin is a script, not an app, so macOS can't show its notifications as comin
 - **Default:** a built-in macOS notification. macOS treats it as coming from Script Editor, so clicking it opens Script Editor.
 - **With [terminal-notifier](https://github.com/julienXX/terminal-notifier) installed:** clicking it brings back the app Claude is running in (Terminal, iTerm2, VS Code, …). nudge finds it on your `PATH` or in Homebrew's folders and uses it automatically. A new nudge replaces the previous banner instead of stacking up.
 
-```bash
-brew install terminal-notifier
-```
-
-terminal-notifier is optional. Everything else works the same without it. A click brings the app forward, but it can't pick a specific tab or session.
+To install it, follow [terminal-notifier's install instructions](https://github.com/julienXX/terminal-notifier). It's optional. Everything else works the same without it. A click brings the app forward, but it can't pick a specific tab or session.
 
 ## Install
 
@@ -51,17 +47,24 @@ In Claude Code:
 
 ```
 /plugin marketplace add praneeth16502/nudge
-/plugin install nudge@nudge
+/plugin install nudge-me@nudge-me
 ```
 
 Or from a terminal:
 
 ```bash
 claude plugin marketplace add praneeth16502/nudge
-claude plugin install nudge@nudge
+claude plugin install nudge-me@nudge-me
 ```
 
 Start a new Claude Code session afterwards so the hooks load.
+
+**Upgrading from 0.2.x?** The plugin was renamed from `nudge` to `nudge-me` in 0.3.0. Remove the old one and its marketplace, then install as above:
+
+```
+/plugin uninstall nudge@nudge
+/plugin marketplace remove nudge
+```
 
 ## Try it
 
@@ -70,7 +73,7 @@ Ask Claude to do something that needs your permission, then switch to your brows
 To fire one by hand, even while your terminal is in front:
 
 ```bash
-echo '{"hook_event_name":"Stop","cwd":"/tmp/demo"}' | NUDGE_FORCE=1 bash ~/.claude/plugins/cache/nudge/nudge/*/scripts/nudge.sh
+echo '{"hook_event_name":"Stop","cwd":"/tmp/demo"}' | NUDGE_FORCE=1 bash ~/.claude/plugins/cache/nudge-me/nudge-me/*/scripts/nudge.sh
 ```
 
 ## Settings
@@ -130,7 +133,7 @@ Point `NUDGE_SOUND` at any audio file you own (mp3, m4a, wav, aiff, …), or at 
 
 **Pause nudges:** `touch ~/.claude/nudge.off`. Resume with `rm ~/.claude/nudge.off`.
 
-**Uninstall:** `/plugin uninstall nudge@nudge`.
+**Uninstall:** `/plugin uninstall nudge-me@nudge-me`.
 
 ## Quiet by default in
 

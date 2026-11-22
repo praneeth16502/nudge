@@ -154,7 +154,7 @@ if [ "$os" = mac ]; then
     v="$(awk -v v="$vol" 'BEGIN{printf "%.2f", v/100}')"
     ( afplay -t "$secs" -v "$v" "$sound" >/dev/null 2>&1 & )
   fi
-  # terminal-notifier (optional, `brew install terminal-notifier`) lets a click bring
+  # terminal-notifier (optional, see its own install instructions) lets a click bring
   # Claude's app forward. Hooks may run with a short PATH, so also look in Homebrew dirs.
   tn=""
   if [ "${NUDGE_NOTIFIER:-}" != osascript ]; then

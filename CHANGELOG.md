@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+- Renamed from `nudge` to `nudge-me`, because the plugin directory already has a connector called "nudge". Install with `/plugin install nudge-me@nudge-me`. Your `NUDGE_*` settings and `~/.claude/nudge.off` keep working.
+- Added a plugin icon.
+- The README links to terminal-notifier's own install instructions instead of showing an install command.
+
 ## 0.2.1
 - Stays silent inside the Claude desktop app by default, since the app sends its own notifications (as Claude, and a click opens the session). Set `NUDGE_IN_DESKTOP_APP=1` to nudge there anyway.
 
